@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from datetime import timedelta
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -19,6 +21,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_simplejwt",
     "users.apps.UsersConfig",
     "api.apps.ApiConfig",
 ]
@@ -35,10 +39,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
+TEMPLATES_DIR = BASE_DIR / "templates"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [TEMPLATES_DIR],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -112,6 +117,20 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 AUTH_USER_MODEL = "users.User"
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 LIST_PER_PAGE = 20
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
