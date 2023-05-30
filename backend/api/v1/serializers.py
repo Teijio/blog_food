@@ -7,15 +7,14 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())]
-    )
+    # password = serializers.CharField(write_only=True) 
     class Meta:
         fields = (
             "username",
             "email",
             "first_name",
             "last_name",
+            "password"
         )
         model = User
 
@@ -23,15 +22,19 @@ class UserSerializer(serializers.ModelSerializer):
             "username": {
                 "validators": [UniqueValidator(queryset=User.objects.all())]
             },
-            "password": {
-                "write_only": True
-            }
         }
+
     def validate_username(self, username):
         if username.lower() == "me":
             raise serializers.ValidationError("Использовать имя me запрещено")
         return username
 
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
 
 class TokenSerializer(serializers.ModelSerializer):
     class Meta:
