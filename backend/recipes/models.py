@@ -8,9 +8,10 @@ class Tag(models.Model):
     name = models.CharField(
         max_length=255,
         unique=True,
+        db_index=True,
         verbose_name="Название тэга",
     )
-    color_code = models.CharField(
+    color = models.CharField(
         max_length=7,
         unique=True,
         verbose_name="Цвет тэга",
@@ -32,18 +33,16 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(
         max_length=255,
-        unique=True,
         verbose_name="Название ингридиента",
     )
-    # quantity = models.DecimalField(
-    #     max_digits=10,
-    #     decimal_places=2,
-    #     verbose_name="Вес/количество ингридиента",
-    # )
-    # unit = models.CharField(
-    #     max_length=50,
-    #     verbose_name="Единица измерения",
-    # )
+    measurement_unit = models.CharField(
+        max_length=50,
+        verbose_name="Единица измерения",
+    )
+
+    class Meta:
+        verbose_name = "Ингридиент"
+        verbose_name_plural = "Ингридиенты"
 
     def __str__(self):
         return self.name
@@ -56,26 +55,26 @@ class Recipe(models.Model):
         related_name="recipes",
         verbose_name="Автор рецепта",
     )
-    title = models.CharField(
+    name = models.CharField(
         max_length=255,
+        db_index=True,
         verbose_name="Название рецепта",
     )
     image = models.ImageField(
-        upload_to="recipe_images/",
+        upload_to="recipe/images/",
         verbose_name="Изображение рецепта",
     )
-    description = models.TextField(
+    text = models.TextField(
         verbose_name="Описание рецепта",
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        on_delete=models.SET_NULL,
         through="RecipeIngredient",  # если понадобится промежуточная связь
         related_name="recipes",
         verbose_name="Ингридиенты",
     )
-    preparation_time = models.IntegerField(
-        verbose_name="Время приготовления в минутах"
+    cooking_time = models.PositiveIntegerField(
+        verbose_name="Время приготовления в минутах",
     )
     tags = models.ManyToManyField(
         Tag,
@@ -94,7 +93,7 @@ class Recipe(models.Model):
         ordering = ("-pub_date",)
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class RecipeIngredient(models.Model):
@@ -106,18 +105,12 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE, verbose_name="Ингредиент"
     )
-    quantity = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
+    amount = models.PositiveIntegerField(
         verbose_name="Вес/количество ингридиента",
-    )
-    unit = models.CharField(
-        max_length=50,
-        verbose_name="Единица измерения",
     )
 
     def __str__(self):
-        return f"{self.ingredient.name} ({self.recipe.title})"
+        return f"{self.ingredient.name} ({self.recipe.name})"
 
 
 class FavoriteRecipe(models.Model):
@@ -135,6 +128,35 @@ class FavoriteRecipe(models.Model):
     )
 
     class Meta:
-        unique_together = ("user", "recipe")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"],
+                name="unique_favorite_user_recipe",
+            )
+        ]
         verbose_name = "Избранный рецепт"
         verbose_name_plural = "Избранные рецепты"
+
+
+class ShoppingList(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="shop_list",
+        verbose_name="Пользователь",
+    )
+    recipes = models.ManyToManyField(
+        Recipe,
+        related_name="in_shop_list",
+        verbose_name="Рецепты в списке покупок",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipes"],
+                name="unique_user_recipe_shopping",
+            )
+        ]
+        verbose_name = "Список покупок"
+        verbose_name_plural = "Списки покупок"
