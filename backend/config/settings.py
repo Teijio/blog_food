@@ -21,9 +21,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "djoser",
     "rest_framework",
     "rest_framework.authtoken",
-    "djoser",
     "users.apps.UsersConfig",
     "api.apps.ApiConfig",
     "recipes.apps.RecipesConfig",
@@ -129,10 +129,5 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ],
 }
-
-# SIMPLE_JWT = {
-#     "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
-#     "AUTH_HEADER_TYPES": ("Bearer",),
-# }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

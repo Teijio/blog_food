@@ -145,8 +145,9 @@ class ShoppingList(models.Model):
         related_name="shop_list",
         verbose_name="Пользователь",
     )
-    recipes = models.ManyToManyField(
+    recipe = models.ForeignKey(
         Recipe,
+        on_delete=models.CASCADE,
         related_name="in_shop_list",
         verbose_name="Рецепты в списке покупок",
     )
@@ -154,7 +155,7 @@ class ShoppingList(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "recipes"],
+                fields=["user", "recipe"],
                 name="unique_user_recipe_shopping",
             )
         ]

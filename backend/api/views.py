@@ -5,12 +5,12 @@ from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
 )
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, status, viewsets, generics
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action, api_view, permission_classes
 
-from .serializers import UserSerializer, TokenSerializer
+from .serializers import UserSerializer, TokenSerializer, SetPasswordSerializer
 
 User = get_user_model()
 
@@ -22,7 +22,7 @@ class UserViewSet(ModelViewSet):
     @action(
         methods=["GET", "PATCH"],
         detail=False,
-        permission_classes=[IsAuthenticated],
+        permission_classes=(IsAuthenticated,),
     )
     def me(self, request):
         if request.method == "PATCH":
@@ -34,6 +34,11 @@ class UserViewSet(ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SetPasswordView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SetPasswordSerializer
 
 
 @api_view(["POST"])
@@ -50,4 +55,3 @@ def gеt_token(request):
 
     message = {"token": AccessToken.for_user(user)}
     return Response(message, status=status.HTTP_200_OK)
-
