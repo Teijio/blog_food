@@ -31,7 +31,7 @@ User = get_user_model()
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = CustomPagination
+    # pagination_class = CustomPagination
 
     def get_serializer_context(self):
         return {"request": self.request}
