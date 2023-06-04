@@ -24,7 +24,7 @@ from django.db import models
 
 class User(AbstractUser):
     """Класс пользователей."""
-
+    # username = models.CharField(max_length=254)
     email = models.EmailField(
         max_length=254,
         unique=True,
@@ -32,6 +32,9 @@ class User(AbstractUser):
     )
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
+
+    # USERNAME_FIELD = "email"
+    # REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = "Пользователь"
@@ -54,10 +57,10 @@ class Follow(models.Model):
         related_name="following",
         verbose_name="Подписчик",
     )
-    following = models.ForeignKey(
+    follower = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="followers",
+        related_name="follower",
         verbose_name="Подписчики",
     )
 
@@ -66,7 +69,7 @@ class Follow(models.Model):
         verbose_name_plural = "Подписки"
         constraints = [
             models.UniqueConstraint(
-                fields=("user", "following"),
+                fields=("user", "follower"),
                 name="unique_followers",
             )
         ]

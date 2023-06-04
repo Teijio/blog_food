@@ -2,10 +2,19 @@ from django.urls import include, path
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 
-from .views import UserViewSet, SetPasswordView
+from .views import (
+    UserViewSet,
+    SetPasswordView,
+    TagViewSet,
+    IngredientViewSet,
+    RecipeViewSet,
+)
 
 router_v1 = routers.DefaultRouter()
 router_v1.register(r"users", UserViewSet, basename="users")
+router_v1.register(r"tags", TagViewSet, basename="tags")
+router_v1.register(r"ingredients", IngredientViewSet, basename="ingredients")
+router_v1.register(r"recipes", RecipeViewSet, basename="recipes")
 
 
 urlpatterns = [
@@ -15,7 +24,15 @@ urlpatterns = [
         SetPasswordView.as_view(),
         name="set_password",
     ),
-    path("auth/token/login/", obtain_auth_token, name="api_token_auth"),
-    path("auth/", include("djoser.urls")),
-    path("auth/", include("djoser.urls.jwt"))
+    path("auth/", include("djoser.urls.authtoken")),
+    # path(
+    #     "auth/token/login/",
+    #     gеt_token,
+    #     name="token_login",
+    # ),
+    # path(
+    #     "auth/token/logout/",
+    #     delete_token.as_view(),
+    #     name="token_logout",
+    # ),
 ]

@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import (
     AllowAny,
@@ -7,10 +8,22 @@ from rest_framework.permissions import (
 )
 from rest_framework import filters, status, viewsets, generics
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken
+
+# from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action, api_view, permission_classes
 
-from .serializers import UserSerializer, TokenSerializer, SetPasswordSerializer
+from recipes.models import Tag, Recipe, Ingredient
+from .serializers import (
+    UserSerializer,
+    SetPasswordSerializer,
+    TagSerializer,
+    IngredientSerializer,
+    RecipeGetSerializer,
+    SubscriptionSerializer,
+)
+
+from users.models import Follow
+from api.pagination import CustomPagination
 
 User = get_user_model()
 
@@ -18,6 +31,10 @@ User = get_user_model()
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = CustomPagination
+
+    def get_serializer_context(self):
+        return {"request": self.request}
 
     @action(
         methods=["GET", "PATCH"],
@@ -35,23 +52,81 @@ class UserViewSet(ModelViewSet):
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(
+        detail=True,
+        methods=["POST", "DELETE"],
+        permission_classes=(IsAuthenticated,),
+    )
+    def subscribe(self, request, pk=None):
+        user = self.get_object()
+        follower = request.user
+
+        if request.method == "POST":
+            if follower == user:
+                return Response(
+                    {"detail": "Вы не можете подписаться на себя."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            follow, created = Follow.objects.get_or_create(
+                user=user,
+                follower=follower,
+            )
+            if not created:
+                return Response(
+                    {"detail": "Вы уже подписаны на этого автора."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == "DELETE":
+            try:
+                follow = Follow.objects.get(user=user, follower=follower)
+                follow.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Follow.DoesNotExist:
+                return Response(
+                    {"detail": "Вы не подписаны на этого пользователя."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+    @action(detail=False, methods=["GET"])
+    def subscriptions(self, request):
+        user = request.user
+        queryset = User.objects.filter(follower__user=user)
+        pages = self.paginate_queryset(queryset)
+        serializer = SubscriptionSerializer(
+            pages, many=True, context={"request": request}
+        )
+        return self.get_paginated_response(serializer.data)
+
+
+class RecipeViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeGetSerializer
+
 
 class SetPasswordView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = SetPasswordSerializer
 
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def gеt_token(request):
-    serializer = TokenSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    email = serializer.validated_data.get("email")
-    password = serializer.validated_data.get("password")
-    user = get_object_or_404(User, email=email)
+class TagViewSet(
+    generics.RetrieveAPIView, generics.ListAPIView, GenericViewSet
+):
+    queryset = Tag.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = TagSerializer
 
-    if not user.check_password(password):
-        return Response("Неверный пароль", status=status.HTTP_400_BAD_REQUEST)
 
-    message = {"token": AccessToken.for_user(user)}
-    return Response(message, status=status.HTTP_200_OK)
+class IngredientViewSet(
+    generics.RetrieveAPIView, generics.ListAPIView, GenericViewSet
+):
+    queryset = Ingredient.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = IngredientSerializer
+
+
+class SubscribeViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
