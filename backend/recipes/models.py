@@ -127,6 +127,7 @@ class FavoriteRecipe(models.Model):
         verbose_name="Избранный рецепт",
     )
 
+
     class Meta:
         constraints = [
             models.UniqueConstraint(

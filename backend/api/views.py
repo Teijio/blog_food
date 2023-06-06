@@ -1,29 +1,33 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
 )
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import filters, status, viewsets, generics
 from rest_framework.response import Response
 
 # from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action, api_view, permission_classes
 
-from recipes.models import Tag, Recipe, Ingredient
+from recipes.models import Tag, Recipe, Ingredient, FavoriteRecipe
 from .serializers import (
     UserSerializer,
-    SetPasswordSerializer,
     TagSerializer,
     IngredientSerializer,
-    RecipeGetSerializer,
     SubscriptionSerializer,
+    FavoriteRecipeSerializer,
+    RecipeSerializer,
 )
+from .filters import RecipeFilter
+
 
 from users.models import Follow
-from api.pagination import CustomPagination
 
 User = get_user_model()
 
@@ -31,26 +35,17 @@ User = get_user_model()
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # pagination_class = CustomPagination
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_context(self):
         return {"request": self.request}
 
-    @action(
-        methods=["GET", "PATCH"],
-        detail=False,
-        permission_classes=(IsAuthenticated,),
-    )
-    def me(self, request):
-        if request.method == "PATCH":
-            serializer = UserSerializer(
-                instance=request.user, data=request.data, partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_permissions(self):
+        if self.action == "retrieve":
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [AllowAny]
+        return [permission() for permission in permission_classes]
 
     @action(
         detail=True,
@@ -61,32 +56,44 @@ class UserViewSet(ModelViewSet):
         user = self.get_object()
         follower = request.user
 
+        user_id = pk
+        follower = request.user
+        try:
+            user = User.objects.get(id=user_id)
+        except Recipe.DoesNotExist:
+            return Response(
+                {"detail": "Пользователь не найден."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         if request.method == "POST":
             if follower == user:
                 return Response(
-                    {"detail": "Вы не можете подписаться на себя."},
+                    {"errors": "Вы не можете подписаться на себя."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
             follow, created = Follow.objects.get_or_create(
-                user=user,
-                follower=follower,
+                user=follower,
+                follower=user,
             )
             if not created:
                 return Response(
-                    {"detail": "Вы уже подписаны на этого автора."},
+                    {"errors": "Вы уже подписаны на этого автора."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            serializer = self.get_serializer(user)
+            serializer = SubscriptionSerializer(
+                user, context=self.get_serializer_context()
+            )
             return Response(serializer.data, status=status.HTTP_200_OK)
         if request.method == "DELETE":
             try:
-                follow = Follow.objects.get(user=user, follower=follower)
+                follow = Follow.objects.get(user=follower, follower=user)
                 follow.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Follow.DoesNotExist:
                 return Response(
-                    {"detail": "Вы не подписаны на этого пользователя."},
+                    {"errors": "Вы не подписаны на этого пользователя."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -103,12 +110,54 @@ class UserViewSet(ModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeGetSerializer
+    serializer_class = RecipeSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
+    def perform_create(self, serializer):
+        return serializer.save(author=self.request.user)
 
-class SetPasswordView(generics.UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = SetPasswordSerializer
+    def perform_update(self, serializer):
+        return serializer.save(author=self.request.user)
+
+    @action(
+        detail=True,
+        methods=["POST", "DELETE"],
+        permission_classes=(IsAuthenticated,),
+    )
+    def favorite(self, request, pk=None):
+        user = request.user
+        recipe_id = pk
+
+        try:
+            recipe = Recipe.objects.get(id=recipe_id)
+        except Recipe.DoesNotExist:
+            return Response(
+                {"detail": "Рецепт не найден."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if request.method == "POST":
+            favorite, created = FavoriteRecipe.objects.get_or_create(
+                user=user, recipe=recipe
+            )
+            if not created:
+                return Response(
+                    {"detail": "Рецепт уже добавлен в избранное."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            serializer = FavoriteRecipeSerializer(favorite)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == "DELETE":
+            try:
+                favorite = FavoriteRecipe.objects.get(user=user, recipe=recipe)
+                favorite.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except FavoriteRecipe.DoesNotExist:
+                return Response(
+                    {"detail": "Рецепт не найден в избранном."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
 
 class TagViewSet(
@@ -117,6 +166,7 @@ class TagViewSet(
     queryset = Tag.objects.all()
     permission_classes = [AllowAny]
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class IngredientViewSet(
