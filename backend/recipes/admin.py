@@ -9,10 +9,12 @@ from .models import (
     ShoppingList,
 )
 
+
 # @admin.register(RecipeIngredient)
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
@@ -24,9 +26,12 @@ class RecipeAdmin(admin.ModelAdmin):
         "tags",
         "ingredients",
     ]
+
     def get_favorite_count(self, obj):
         return obj.favorite_by.count()
+
     get_favorite_count.short_description = "Добавлен в избранное"
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -37,6 +42,7 @@ class TagAdmin(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "measurement_unit"]
     list_filter = ["name"]
+
 
 @admin.register(FavoriteRecipe)
 class FavoriteRecipeAdmin(admin.ModelAdmin):

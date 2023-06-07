@@ -127,20 +127,20 @@ class FavoriteRecipe(models.Model):
         verbose_name="Избранный рецепт",
     )
 
-
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["user", "recipe"],
-                name="unique_favorite_user_recipe",
-            )
-        ]
         verbose_name = "Избранный рецепт"
         verbose_name_plural = "Избранные рецепты"
+        default_related_name = "favorites"
+        constraints = (
+            models.UniqueConstraint(
+                fields=("user", "recipe"),
+                name="unique_user_recipe",
+            ),
+        )
 
 
 class ShoppingList(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="shop_list",
@@ -154,11 +154,12 @@ class ShoppingList(models.Model):
     )
 
     class Meta:
+        verbose_name = "покупка"
+        verbose_name_plural = "покупки"
+        default_related_name = "shopping_list"
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "recipe"],
-                name="unique_user_recipe_shopping",
+                fields=("user", "recipe"),
+                name="unique_shopping",
             )
         ]
-        verbose_name = "Список покупок"
-        verbose_name_plural = "Списки покупок"

@@ -6,6 +6,7 @@ User = get_user_model()
 
 from .models import Follow
 
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     """Настройка для пользователей."""
@@ -25,7 +26,4 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "follower"
-    )
+    list_display = ("user", "follower")
