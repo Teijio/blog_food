@@ -1,18 +1,29 @@
 import os
+import sys
 from pathlib import Path
-
 from datetime import timedelta
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = (
-    "django-insecure-zqdu@iy-=v7jgbcveorp$e_(an3#@5sr2gib_w7#x4vaj1fzgq"
-)
+SECRET_KEY = os.getenv("SECRET_KEY")
 
+if not SECRET_KEY:
+    raise sys.exit("Секретный ключ отсутствует.")
+
+# при деплое не забыть
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = [
+    "51.250.99.193",
+    "127.0.0.1",
+    "localhost",
+    "teburashka.ru",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -26,7 +37,6 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "users.apps.UsersConfig",
-    "api.apps.ApiConfig",
     "recipes.apps.RecipesConfig",
 ]
 
@@ -61,15 +71,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DB_NAME = "myproject"
-DB_USER = "myprojectuser"
-DB_PASSWORD = "password"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": DB_NAME,
-        "USER": DB_USER,
-        "PASSWORD": DB_PASSWORD,
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -81,6 +89,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 9,
+        },
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -89,7 +100,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
 LANGUAGE_CODE = "ru-RU"
 
 TIME_ZONE = "UTC"

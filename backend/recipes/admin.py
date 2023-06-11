@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils.html import format_html
+from django.template.loader import render_to_string
 
 from .models import (
     Tag,
@@ -10,7 +12,6 @@ from .models import (
 )
 
 
-# @admin.register(RecipeIngredient)
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
@@ -24,18 +25,17 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = [RecipeIngredientInline]
     filter_horizontal = [
         "tags",
-        "ingredients",
     ]
 
+    @admin.display(description="Добавлен в избранное.")
     def get_favorite_count(self, obj):
         return obj.favorite_by.count()
-
-    get_favorite_count.short_description = "Добавлен в избранное"
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["name", "colored_name"]
+    search_fields = ["name"]
 
 
 @admin.register(Ingredient)

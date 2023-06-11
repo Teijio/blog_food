@@ -2,7 +2,11 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import (
+    ModelViewSet,
+    GenericViewSet,
+    ReadOnlyModelViewSet,
+)
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import (
     AllowAny,
@@ -83,38 +87,70 @@ class RecipeViewSet(ModelViewSet):
 
     @action(
         detail=True,
-        methods=("POST", "DELETE"),
+        methods=["POST"],
+        permission_classes=(IsAuthenticated,),
+        name="Add recipe to favorites",
+    )
+    def favorite(self, request, pk=None):
+        user = request.user
+        recipe = self.get_object()
+        favorite, created = FavoriteRecipe.objects.get_or_create(
+            user=user, recipe=recipe
+        )
+        if not created:
+            return Response(
+                {"detail": "Рецепт уже добавлен в избранное."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = FavoriteShoppingSerializer(favorite)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @favorite.mapping.delete
+    def remove_favorite(self, request, pk=None):
+        user = request.user
+        recipe = self.get_object()
+        try:
+            favorite = FavoriteRecipe.objects.get(user=user, recipe=recipe)
+        except FavoriteRecipe.DoesNotExist:
+            return Response(
+                {"detail": "Рецепт не найден в избранном."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=True,
+        methods=["POST"],
         permission_classes=(IsAuthenticated,),
     )
     def shopping_cart(self, request, pk=None):
         user = request.user
         recipe = self.get_object()
-        if request.method == "POST":
-            add_to_shopping_list, created = ShoppingList.objects.get_or_create(
-                user=user, recipe=recipe
-            )
-            if created:
-                serializer = FavoriteShoppingSerializer(add_to_shopping_list)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED
-                )
+        add_to_shopping_list, created = ShoppingList.objects.get_or_create(
+            user=user, recipe=recipe
+        )
+        if created:
+            serializer = FavoriteShoppingSerializer(add_to_shopping_list)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            {"detail": "Рецепт уже добавлен в корзину."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    @shopping_cart.mapping.delete
+    def remove_from_shopping_cart(self, request, pk=None):
+        user = request.user
+        recipe = self.get_object()
+        try:
+            shopping_list = ShoppingList.objects.get(user=user, recipe=recipe)
+        except ShoppingList.DoesNotExist:
             return Response(
-                {"detail": "Рецепт уже добавлен в корзину."},
+                {"detail": "Рецепт не найден в корзине."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        if request.method == "DELETE":
-            try:
-                remove_from_shopping_list = ShoppingList.objects.get(
-                    user=user, recipe=recipe
-                )
-            except ShoppingList.DoesNotExist:
-                return Response(
-                    {"detail": "Рецепт не найден в корзине."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            remove_from_shopping_list.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        shopping_list.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
@@ -133,18 +169,14 @@ class RecipeViewSet(ModelViewSet):
         return out_list_ingredients(self, request, ingredients)
 
 
-class TagViewSet(
-    generics.RetrieveAPIView, generics.ListAPIView, GenericViewSet
-):
+class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = AllowAny
     pagination_class = None
 
 
-class IngredientViewSet(
-    generics.RetrieveAPIView, generics.ListAPIView, GenericViewSet
-):
+class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = AllowAny

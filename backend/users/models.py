@@ -1,5 +1,7 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
 
 
 class User(AbstractUser):
@@ -7,11 +9,19 @@ class User(AbstractUser):
 
     email = models.EmailField(
         max_length=254,
-        unique=True,
+        unique=True,    
         verbose_name="Email",
     )
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
+
+    def clean(self):
+        super().clean()
+        try:
+            validate_password(self.password, self)
+        except ValidationError as e:
+            error_messages = [error.message for error in e.error_list]
+            raise ValidationError({"password": error_messages})
 
     class Meta:
         verbose_name = "Пользователь"

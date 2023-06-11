@@ -1,5 +1,8 @@
 from django.db import models
+from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.utils.html import format_html
+from django.core.validators import RegexValidator
 
 User = get_user_model()
 
@@ -15,12 +18,26 @@ class Tag(models.Model):
         max_length=7,
         unique=True,
         verbose_name="Цвет тэга",
+        validators=[
+            RegexValidator(
+                regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+                message="Цвет должен быть в формате hex-кода. Например #FFFFFF",
+            )
+        ],
     )
     slug = models.SlugField(
         max_length=255,
         unique=True,
         verbose_name="Слаг тэга",
     )
+
+    @admin.display(ordering="name")
+    def colored_name(self):
+        return format_html(
+            '<span style="color: {};">{}</span>',
+            self.color,
+            self.name,
+        )
 
     class Meta:
         verbose_name = "Тэг"
@@ -73,7 +90,7 @@ class Recipe(models.Model):
         related_name="recipes",
         verbose_name="Ингридиенты",
     )
-    cooking_time = models.PositiveIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name="Время приготовления в минутах",
     )
     tags = models.ManyToManyField(
@@ -103,7 +120,9 @@ class RecipeIngredient(models.Model):
         verbose_name="Название рецепта",
     )
     ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, verbose_name="Ингредиент"
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name="Ингредиент",
     )
     amount = models.PositiveIntegerField(
         verbose_name="Вес/количество ингридиента",

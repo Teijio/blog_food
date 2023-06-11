@@ -1,14 +1,9 @@
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
-from django.db import models, transaction
-from django.db.models import F
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-from rest_framework.validators import UniqueValidator
 
-# from drf_writable_nested import WritableNestedModelSerializer
+from rest_framework import serializers
 
 
 from .utils import Base64ImageField
@@ -27,13 +22,13 @@ User = get_user_model()
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
+        model = Tag
         fields = (
             "id",
             "name",
             "color",
             "slug",
         )
-        model = Tag
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -89,8 +84,11 @@ class UserSerializer(serializers.ModelSerializer):
             ).exists()
         return False
 
+    def validate_password(self, value):
+        validate_password(value, self.instance)
+        return value
+
     def create(self, validated_data):
-        validated_data.pop("is_subscribed", None)
         validated_data["password"] = make_password(validated_data["password"])
         return super().create(validated_data)
 
@@ -127,11 +125,8 @@ class SubscriptionSerializer(UserSerializer):
         )
         recipes = obj.recipes.all()
         if recipes_limit:
-            try:
-                limit = int(recipes_limit)
-                recipes = recipes[:limit]
-            except ValueError:
-                pass
+            limit = int(recipes_limit)
+            recipes = recipes[:limit]
         return RecipeLightSerializer(recipes, many=True, read_only=True).data
 
     def get_recipes_count(self, obj):
