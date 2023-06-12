@@ -108,6 +108,7 @@ vscode/
 .vscode
 /.vscode
 
+vm_access/
 
 # Environments
 .env

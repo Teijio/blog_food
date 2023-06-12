@@ -7,7 +7,7 @@ from recipes.models import Ingredient
 
 class Command(BaseCommand):
     def import_ingredients(self, file="ingredients.json"):
-        file_path = f"../data/{file}"
+        file_path = f"data/{file}"
         try:
             with open(file_path, "r") as file:
                 data = json.load(file)
