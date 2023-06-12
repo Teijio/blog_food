@@ -132,21 +132,33 @@ class RecipeIngredient(models.Model):
         return f"{self.ingredient.name} ({self.recipe.name})"
 
 
-class FavoriteRecipe(models.Model):
+class FavoriteShoppingModel(models.Model):
+    """Абстрактная модель для добавления в избранное и покупки."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="favorite_recipes",
+        # null=True,
         verbose_name="Пользователь",
     )
+
     recipe = models.ForeignKey(
-        Recipe,
+        "Recipe",
         on_delete=models.CASCADE,
-        related_name="favorite_by",
-        verbose_name="Избранный рецепт",
+        verbose_name="Рецепт",
     )
 
     class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.user} - {self.recipe}"
+
+
+class FavoriteRecipe(FavoriteShoppingModel):
+    """Модель избранного."""
+
+    class Meta(FavoriteShoppingModel.Meta):
         verbose_name = "Избранный рецепт"
         verbose_name_plural = "Избранные рецепты"
         default_related_name = "favorites"
@@ -158,23 +170,12 @@ class FavoriteRecipe(models.Model):
         )
 
 
-class ShoppingList(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="shop_list",
-        verbose_name="Пользователь",
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name="in_shop_list",
-        verbose_name="Рецепты в списке покупок",
-    )
+class ShoppingList(FavoriteShoppingModel):
+    """Корзина покупок."""
 
-    class Meta:
-        verbose_name = "покупка"
-        verbose_name_plural = "покупки"
+    class Meta(FavoriteShoppingModel.Meta):
+        verbose_name = "Покупка"
+        verbose_name_plural = "Покупки"
         default_related_name = "shopping_list"
         constraints = [
             models.UniqueConstraint(
@@ -182,3 +183,55 @@ class ShoppingList(models.Model):
                 name="unique_shopping",
             )
         ]
+
+
+# class FavoriteRecipe(models.Model):
+#     user = models.ForeignKey(
+#         User,
+#         on_delete=models.CASCADE,
+#         related_name="favorite_recipes",
+#         verbose_name="Пользователь",
+#     )
+#     recipe = models.ForeignKey(
+#         Recipe,
+#         on_delete=models.CASCADE,
+#         related_name="favorite_by",
+#         verbose_name="Избранный рецепт",
+#     )
+
+#     class Meta:
+#         verbose_name = "Избранный рецепт"
+#         verbose_name_plural = "Избранные рецепты"
+#         default_related_name = "favorites"
+#         constraints = (
+#             models.UniqueConstraint(
+#                 fields=("user", "recipe"),
+#                 name="unique_user_recipe",
+#             ),
+#         )
+
+
+# class ShoppingList(models.Model):
+# user = models.ForeignKey(
+#     User,
+#     on_delete=models.CASCADE,
+#     related_name="shop_list",
+#     verbose_name="Пользователь",
+# )
+# recipe = models.ForeignKey(
+#     Recipe,
+#     on_delete=models.CASCADE,
+#     related_name="in_shop_list",
+#     verbose_name="Рецепты в списке покупок",
+# )
+
+# class Meta:
+#     verbose_name = "покупка"
+#     verbose_name_plural = "покупки"
+#     default_related_name = "shopping_list"
+#     constraints = [
+#         models.UniqueConstraint(
+#             fields=("user", "recipe"),
+#             name="unique_shopping",
+#         )
+#     ]
