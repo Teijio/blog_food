@@ -134,10 +134,10 @@ REST_FRAMEWORK = {
 DJOSER = {
     "LOGIN_FIELD": "email",
     "SERIALIZERS": {
-        "user_list": "api.serializers.UserSerializer",
-        "user": "api.serializers.UserSerializer",
-        "current_user": "api.serializers.UserSerializer",
-        "user_create": "api.serializers.UserSerializer",
+        "user_list": "api.users.serializers.UserSerializer",
+        "user": "api.users.serializers.UserSerializer",
+        "current_user": "api.users.serializers.UserSerializer",
+        "user_create": "api.users.serializers.UserSerializer",
     },
     "PERMISSIONS": {
         "user_list": ["rest_framework.permissions.AllowAny"],
@@ -146,7 +146,5 @@ DJOSER = {
     },
     "HIDE_USERS": False,
 }
-
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

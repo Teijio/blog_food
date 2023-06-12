@@ -1,1 +1,9 @@
-# praktikum_new_diplom
+[Python](https://www.python.org)
+[Nginx](https://nginx.org)
+[Gunicorn](https://gunicorn.org)
+[Docker](https://www.docker.com)
+[GitHub Actions](https://github.com/features/actions)
+[Yandex.Cloud](https://cloud.yandex.com)
+[Django REST framework](https://www.django-rest-framework.org)
+[PostgreSQL](https://www.postgresql.org)
+[Codecov](https://codecov.io)
