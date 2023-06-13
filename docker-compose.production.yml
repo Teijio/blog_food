@@ -29,7 +29,8 @@ services:
     image: ridpfrep/food_gateway
     env_file: .env
     ports:
-      - 8000:80
+      - "80:80"
+    restart: always
     volumes:
       - static_food:/staticfiles/
       - media_food:/mediafiles/
