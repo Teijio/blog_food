@@ -114,7 +114,7 @@ sudo docker-compose exec backend python manage.py load_ingredients
 #
 
 ## Документация к API
-Чтобы открыть документацию локально, запустите сервер и перейдите по ссылке:
-[http://localhost/api/docs/](http://localhost/api/docs/) или воспользуйтесь докой на моей сервере: [REDOC](http://130.193.41.225/api/docs/)
-
+Чтобы открыть документацию, внутри репозитория есть папка infra.
+Перейдите в нее и выполните docker compose up.
+Документация будет доступна по localhost/api/docs
 #
