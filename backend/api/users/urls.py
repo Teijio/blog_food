@@ -1,9 +1,6 @@
 from django.urls import include, path
 
-from .views import (
-    SubscribeViewSet,
-    SubscribeListView,
-)
+from .views import SubscribeListView, SubscribeViewSet
 
 urlpatterns = [
     path(

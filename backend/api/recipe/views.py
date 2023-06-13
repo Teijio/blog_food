@@ -1,33 +1,30 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
-
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import action
-
-from recipes.models import (
-    Recipe,
-    FavoriteRecipe,
-    ShoppingList,
-    RecipeIngredient,
-)
 from api.permissions import IsOwnerOrReadOnly
-from .serializers import (
-    FavoriteShoppingSerializer,
-    RecipeSerializer,
+from recipes.models import (
+    FavoriteRecipe,
+    Recipe,
+    RecipeIngredient,
+    ShoppingList,
 )
-from .filters import RecipeFilter
-from .utils import out_list_ingredients
 
+from .filters import RecipeFilter
+from .serializers import FavoriteShoppingSerializer, RecipeSerializer
+from .utils import out_list_ingredients
 
 User = get_user_model()
 
 
 class RecipeViewSet(ModelViewSet):
+    """Вьюсет для рецептов."""
+
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsOwnerOrReadOnly,)

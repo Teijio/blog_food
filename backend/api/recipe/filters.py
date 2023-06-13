@@ -4,6 +4,8 @@ from recipes.models import Recipe, Tag
 
 
 class RecipeFilter(filters.FilterSet):
+    """Фильтр для рецептов."""
+
     is_favorited = filters.BooleanFilter(
         method="filter_is_favorited",
     )

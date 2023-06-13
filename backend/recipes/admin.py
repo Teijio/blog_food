@@ -1,15 +1,9 @@
 from django.contrib import admin
-from django.utils.html import format_html
 from django.template.loader import render_to_string
+from django.utils.html import format_html
 
-from .models import (
-    Tag,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    FavoriteRecipe,
-    ShoppingList,
-)
+from .models import (FavoriteRecipe, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingList, Tag)
 
 
 class RecipeIngredientInline(admin.TabularInline):
@@ -19,6 +13,8 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    """Отображение модели рецептов в admin панели."""
+
     list_display = ["name", "author", "get_favorite_count"]
     list_filter = ["author", "name", "tags"]
     search_fields = ["name", "author__username"]
@@ -34,24 +30,32 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
+    """Отображение модели тагов в admin панели."""
+
     list_display = ["name", "colored_name"]
     search_fields = ["name"]
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
+    """Отображение ингридиентов пользователей в admin панели."""
+
     list_display = ["id", "name", "measurement_unit"]
     list_filter = ["name"]
 
 
 @admin.register(FavoriteRecipe)
 class FavoriteRecipeAdmin(admin.ModelAdmin):
+    """Отображение модели избранных рецептов в admin панели."""
+
     pass
 
 
 @admin.register(ShoppingList)
 class ShoppingListAdmin(admin.ModelAdmin):
+    """Отображение модели покупок в admin панели."""
+
     pass
 
 
-admin.site.register(RecipeIngredient)  # Регистрируем RecipeIngredient отдельно
+admin.site.register(RecipeIngredient)

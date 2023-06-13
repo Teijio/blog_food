@@ -1,18 +1,20 @@
 from django.contrib.auth import get_user_model
-
+from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from users.models import Follow
 
 from .serializers import SubscriptionSerializer
-from users.models import Follow
 
 User = get_user_model()
 
 
 class SubscribeViewSet(APIView):
+    """APIView для кастомной модели пользователя."""
+
     serializer_class = SubscriptionSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -68,6 +70,8 @@ class SubscribeViewSet(APIView):
 
 
 class SubscribeListView(ListAPIView):
+    """ListAPIView для подписок пользователей."""
+
     serializer_class = SubscriptionSerializer
     permission_classes = (IsAuthenticated,)
 

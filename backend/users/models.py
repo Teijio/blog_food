@@ -1,15 +1,15 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.db import models
 
 
 class User(AbstractUser):
-    """Класс пользователей."""
+    """Модель пользователей."""
 
     email = models.EmailField(
         max_length=254,
-        unique=True,    
+        unique=True,
         verbose_name="Email",
     )
     first_name = models.CharField(max_length=150)
@@ -38,6 +38,7 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
+    """Модель подписки/отписки на пользователя."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

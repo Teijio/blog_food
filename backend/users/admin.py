@@ -10,6 +10,7 @@ from .models import Follow
 
 
 class CustomUserAdmin(UserAdmin):
+    """Отображение модели пользователей в admin панели."""
     add_form = UserCreationForm
     model = User
 

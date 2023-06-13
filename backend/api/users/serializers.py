@@ -1,16 +1,17 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import make_password
-
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from users.models import Follow
 from recipes.models import Recipe
+from users.models import Follow
 
 User = get_user_model()
 
 
 class RecipeLightSerializer(serializers.ModelSerializer):
+    """Упрощенный сериализатор для рецептов при отписке/подписке."""
+
     class Meta:
         model = Recipe
         fields = (
@@ -22,6 +23,8 @@ class RecipeLightSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для всех пользователей."""
+
     is_subscribed = serializers.SerializerMethodField()
     password = serializers.CharField(write_only=True)
 
@@ -62,6 +65,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AuthorRecipeSerializer(UserSerializer):
+    """Сериализатор только для автора с дефолтным to_representation."""
+
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields
 
@@ -71,6 +76,8 @@ class AuthorRecipeSerializer(UserSerializer):
 
 
 class SubscriptionSerializer(UserSerializer):
+    """Сериализатор для подписки/отписки пользователей."""
+
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 

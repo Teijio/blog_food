@@ -4,6 +4,8 @@ from recipes.models import Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """Сериализатор для тэгов."""
+
     class Meta:
         model = Tag
         fields = (

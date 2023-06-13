@@ -1,24 +1,25 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-
 from rest_framework import serializers
 
-from .utils import Base64ImageField
 from api.tags.serializers import TagSerializer
 from api.users.serializers import AuthorRecipeSerializer
 from recipes.models import (
-    Recipe,
-    ShoppingList,
-    Ingredient,
-    RecipeIngredient,
     FavoriteRecipe,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingList,
 )
+
+from .utils import Base64ImageField
 
 User = get_user_model()
 
 
-
 class RecipeIngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор для связанной модели между рецептами и ингридиентами."""
+
     id = serializers.IntegerField(source="ingredient.id")
     name = serializers.CharField(
         source="ingredient.name",
@@ -40,6 +41,8 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class FavoriteShoppingSerializer(serializers.ModelSerializer):
+    """Сериализатор для избранных рецептов и корзины."""
+
     id = serializers.IntegerField(source="recipe.id")
     name = serializers.CharField(source="recipe.name")
     image = serializers.ImageField(source="recipe.image")
@@ -56,6 +59,8 @@ class FavoriteShoppingSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для рецептов."""
+
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
     image = Base64ImageField()

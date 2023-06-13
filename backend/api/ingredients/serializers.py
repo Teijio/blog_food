@@ -1,9 +1,6 @@
 from rest_framework import serializers
 
-from recipes.models import (
-    Ingredient,
-    RecipeIngredient,
-)
+from recipes.models import Ingredient, RecipeIngredient
 
 
 class IngredientSerializer(serializers.ModelSerializer):

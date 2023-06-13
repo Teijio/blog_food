@@ -1,13 +1,15 @@
-from django.db import models
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.utils.html import format_html
 from django.core.validators import RegexValidator
+from django.db import models
+from django.utils.html import format_html
 
 User = get_user_model()
 
 
 class Tag(models.Model):
+    """Модель тэгов."""
+
     name = models.CharField(
         max_length=255,
         unique=True,
@@ -48,6 +50,8 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    """Модель ингридиентов."""
+
     name = models.CharField(
         max_length=255,
         verbose_name="Название ингридиента",
@@ -66,6 +70,8 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    """Модель рецептов."""
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -114,6 +120,8 @@ class Recipe(models.Model):
 
 
 class RecipeIngredient(models.Model):
+    """Связующая модель между рецептами и ингридиентами."""
+
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
