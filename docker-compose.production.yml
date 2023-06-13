@@ -33,4 +33,4 @@ services:
     volumes:
       - static_food:/staticfiles/
       - media_food:/mediafiles/
-      
+
