@@ -23,7 +23,7 @@ class Tag(models.Model):
         validators=[
             RegexValidator(
                 regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
-                message="Цвет должен быть в формате hex-кода. Например #FFFFFF",
+                message="Цвет должен быть в формате hex-кода. Пример #FFFFFF",
             )
         ],
     )

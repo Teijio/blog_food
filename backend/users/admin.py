@@ -1,5 +1,5 @@
-from django.conf import settings
 from django.contrib import admin
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm
@@ -11,6 +11,7 @@ from .models import Follow
 
 class CustomUserAdmin(UserAdmin):
     """Отображение модели пользователей в admin панели."""
+
     add_form = UserCreationForm
     model = User
 

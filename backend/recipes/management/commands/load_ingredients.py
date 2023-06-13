@@ -7,6 +7,7 @@ from recipes.models import Ingredient
 
 class Command(BaseCommand):
     """Команда для загрузки данных в БД."""
+
     def import_ingredients(self, file="ingredients.json"):
         file_path = f"data/{file}"
         try:
@@ -34,4 +35,3 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.import_ingredients()
-
