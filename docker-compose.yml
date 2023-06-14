@@ -31,7 +31,7 @@ services:
     ports:
       - 8000:80
     volumes:
-      - static_food:/static/
-      - media_food:/media/
+      - static_food:/staticfiles/
+      - media_food:/mediafiles/
     restart: always
 
