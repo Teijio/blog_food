@@ -14,7 +14,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise sys.exit("Секретный ключ отсутствует.")
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "51.250.99.193",
