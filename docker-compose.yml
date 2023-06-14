@@ -30,8 +30,8 @@ services:
     env_file: .env
     ports:
       - 8000:80
-    volumes:
-      - static_food:/static/
-      - media_food:/media/
     restart: always
+    volumes:
+      - static_food:/staticfiles/
+      - media_food:/mediafiles/
 
