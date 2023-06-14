@@ -32,6 +32,6 @@ services:
       - 8000:80
     restart: always
     volumes:
-      - static_food:/media/
-      - media_food:/static/
+      - static_food:/static/
+      - media_food:/media/
 
