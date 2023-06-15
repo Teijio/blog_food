@@ -72,7 +72,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": os.getenv(
+            "DB_ENGINE", "django.db.backends.postgresql_psycopg2"
+        ),
         "NAME": os.getenv("POSTGRES_DB", "foodgram"),
         "USER": os.getenv("POSTGRES_USER", "foodgram"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),

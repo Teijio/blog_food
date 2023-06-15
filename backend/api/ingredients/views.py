@@ -3,7 +3,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from recipes.models import Ingredient
-
 from .filters import IngredientFilter
 from .serializers import IngredientSerializer
 

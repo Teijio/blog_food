@@ -15,14 +15,6 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
 
-    def clean(self):
-        super().clean()
-        try:
-            validate_password(self.password, self)
-        except ValidationError as e:
-            error_messages = [error.message for error in e.error_list]
-            raise ValidationError({"password": error_messages})
-
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
@@ -39,6 +31,7 @@ class User(AbstractUser):
 
 class Follow(models.Model):
     """Модель подписки/отписки на пользователя."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

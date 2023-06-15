@@ -16,23 +16,27 @@ Foodgram - онлайн-сервис, где пользователи смогу
 ## Подготовка сервера
 
 ```bash
-# В Settings - Secrets and variables создаем переменный с вашими данными
-# Это необходимо для работы с CI/CD, DockerHub, GitHub
+# Создайте файл .env в директории проекта и укажите в нем:
 SECRET_KEY #'< секретный ключ >'
-DEBUG #False
-ALLOWED_HOSTS #'127.0.0.1, .localhost, 011.222.333.444' - адрес вашего сервера
-DB_ENGINE #django.db.backends.postgresql_psycopg2
-DB_NAME #postgres
 POSTGRES_USER #postgres
 POSTGRES_PASSWORD #postgres
+POSTGRES_DB  #postgres
+DB_NAME #foodgram
 DB_HOST #db
 DB_PORT #5432
+
+# Добавьте секреты в репозиторий своего проекта.
 HOST #011.222.333.444
 USER #admin
 PASSWORD #password
 SSH_KEY #Приватный ключ
 DOCKER_USERNAME #Логин от докера
 DOCKER_PASSWORD #Пароль от докера
+
+# В файле settings введите свой ip, доменное имя.
+ALLOWED_HOSTS #'127.0.0.1, .localhost, 011.222.333.444' - адрес вашего сервера
+
+
 
 ```
 
@@ -86,11 +90,11 @@ scp docker-compose.yml nginx.conf admin@011.222.333.444:/home/admin/
 ```
 ## Запуск
 
-Комманда git push является триггером workflow проекта. При выполнении команды git push запустится набор блоков комманд jobs. Последовательно будут выполнены следующие блоки:
+Команда git push является триггером workflow проекта. При выполнении команды git push запустится набор блоков команд jobs. Последовательно будут выполнены следующие блоки:
 
 **tests** - тестирование проекта на соответствие PEP8.
 
-**build_and_push_to_docker_hub** - при успешном прохождении тестов собирается образ (image) для docker контейнера и отправлятеся в DockerHub
+**build_and_push_to_docker_hub** - при успешном прохождении тестов собирается образ (image) для docker контейнера и отправляется в DockerHub
 
 **deploy** - после отправки образа на DockerHub начинается деплой проекта на сервере.
 
@@ -118,3 +122,8 @@ sudo docker-compose exec backend python manage.py load_ingredients
 Перейдите в нее и выполните docker compose up.
 Документация будет доступна по localhost/api/docs
 #
+
+###
+Автор проекта - Артур Шутов
+###
+Ревьювер - Андрей Белов

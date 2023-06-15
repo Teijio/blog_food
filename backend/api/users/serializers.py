@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
-from recipes.models import Recipe
 from rest_framework import serializers
+
+from recipes.models import Recipe
 from users.models import Follow
 
 User = get_user_model()
