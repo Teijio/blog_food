@@ -12,7 +12,7 @@ services:
     volumes:
       - pg_data_food:/var/lib/postgresql/data
   backend:
-    image: ridpfrep/food_backend
+    build: ./backend/
     env_file: .env
     volumes:
       - static_food:/backend_static
@@ -20,13 +20,13 @@ services:
     depends_on:
       - db
   frontend:
+    build: ./frontend/
     env_file: .env
-    image: ridpfrep/food_frontend
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - static_food:/frontend_static
   gateway:
-    image: ridpfrep/food_gateway
+    build: ./nginx/
     env_file: .env
     ports:
       - 8000:80
@@ -34,6 +34,4 @@ services:
     volumes:
       - static_food:/staticfiles/
       - media_food:/mediafiles/
-      # - static_food:/staticfiles/
-      # - media_food:/mediafiles/
 
