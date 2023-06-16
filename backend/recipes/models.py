@@ -104,6 +104,8 @@ class Recipe(models.Model):
         Tag,
         related_name="recipes",
         verbose_name="Теги",
+        unique=True,
+        null=False, blank=False,
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
@@ -137,6 +139,14 @@ class RecipeIngredient(models.Model):
         verbose_name="Вес/количество ингридиента",
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("recipe", "ingredient"),
+                name="unique_ingredient",
+            )
+        ]
+
     def __str__(self):
         return f"{self.ingredient.name} ({self.recipe.name})"
 
@@ -147,7 +157,6 @@ class FavoriteShoppingModel(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        # null=True,
         verbose_name="Пользователь",
     )
 

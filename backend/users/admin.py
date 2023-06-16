@@ -3,8 +3,10 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
 
 from .models import Follow
+from .forms import FollowForm
 
 User = get_user_model()
 
@@ -31,3 +33,4 @@ class CustomUserAdmin(UserAdmin):
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
     list_display = ("user", "follower")
+    form = FollowForm

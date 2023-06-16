@@ -12,6 +12,7 @@ from .models import (
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
+    min_num = 1
     extra = 1
 
 
