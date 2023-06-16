@@ -20,7 +20,7 @@ class RecipeFilter(filters.FilterSet):
         queryset=Tag.objects.all(),
         field_name="tags__slug",
         to_field_name="slug",
-        conjoined=True,
+        conjoined=False,
     )
 
     class Meta:

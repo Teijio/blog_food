@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.utils.html import format_html
 
@@ -98,6 +98,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name="Время приготовления в минутах",
+        validators=[MinValueValidator(1)],
     )
     tags = models.ManyToManyField(
         Tag,
